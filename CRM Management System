@@ -1,0 +1,144 @@
+"""
+CRM Lead Management System
+"""
+
+import pickle
+import os
+
+# ---------------- ADD LEAD ----------------
+def addLead():
+    file = open('leads.bin','ab')
+    lead_id = input("\nEnter Lead ID : ")
+    name = input("Enter Lead Name : ")
+    phone = input("Enter Phone Number : ")
+    email = input("Enter Email : ")
+    source = input("Enter Lead Source (Website/Instagram/etc): ")
+    status = "New"
+    pickle.dump(lead_id,file)
+    pickle.dump(name,file)
+    pickle.dump(phone,file)
+    pickle.dump(email,file)
+    pickle.dump(source,file)
+    pickle.dump(status,file)
+    file.close()
+    print("\nLEAD ADDED SUCCESSFULLY!")
+    input("Press Enter to continue...")
+
+# ---------------- VIEW LEADS ----------------
+def viewLeads():
+    try:
+        file = open('leads.bin', 'rb')
+
+        print("\n{:<8} {:<15} {:<12} {:<25} {:<12} {:<12}".format(
+            "ID", "Name", "Phone", "Email", "Source", "Status"
+        ))
+        print("-" * 85)
+
+        while True:
+            lead_id = pickle.load(file)
+            name = pickle.load(file)
+            phone = pickle.load(file)
+            email = pickle.load(file)
+            source = pickle.load(file)
+            status = pickle.load(file)
+
+            print("{:<8} {:<15} {:<12} {:<25} {:<12} {:<12}".format(
+                lead_id, name, phone, email, source, status
+            ))
+
+    except EOFError:
+        pass
+
+    file.close()
+    input("\nPress Enter to continue...")
+# ---------------- UPDATE LEAD STATUS ----------------
+def updateLeadStatus():
+    file1 = open('leads.bin','rb')
+    file2 = open('temp.bin','ab')
+    lead_id = input("\nEnter Lead ID to update: ")
+    found = False
+
+    try:
+        while True:
+            data = pickle.load(file1)
+            if data == lead_id:
+                found = True
+                pickle.dump(data,file2)
+                for i in range(4):
+                    pickle.dump(pickle.load(file1),file2)
+                old_status = pickle.load(file1)
+                print("Old Status:", old_status)
+                new_status = input("Enter New Status (Contacted/Converted/Lost): ")
+                pickle.dump(new_status,file2)
+            else:
+                pickle.dump(data,file2)
+    except:
+        pass
+
+    file1.close()
+    file2.close()
+    os.remove('leads.bin')
+    os.rename('temp.bin','leads.bin')
+
+    if found:
+        print("\nSTATUS UPDATED!")
+    else:
+        print("\nLEAD NOT FOUND!")
+
+    input("Press Enter to continue...")
+
+# ---------------- DELETE LEAD ----------------
+def deleteLead():
+    file1 = open('leads.bin','rb')
+    file2 = open('temp.bin','ab')
+    lead_id = input("\nEnter Lead ID to delete: ")
+    found = False
+
+    try:
+        while True:
+            data = pickle.load(file1)
+            if data == lead_id:
+                found = True
+                for i in range(5):
+                    pickle.load(file1)
+            else:
+                pickle.dump(data,file2)
+    except:
+        pass
+
+    file1.close()
+    file2.close()
+    os.remove('leads.bin')
+    os.rename('temp.bin','leads.bin')
+
+    if found:
+        print("\nLEAD DELETED!")
+    else:
+        print("\nLEAD NOT FOUND!")
+
+    input("Press Enter to continue...")
+
+# ---------------- DASHBOARD ----------------
+print("\n CRM LEAD MANAGEMENT SYSTEM")
+while True:
+    print("""
+1. Add Lead
+2. View All Leads
+3. Update Lead Status
+4. Delete Lead
+0. Exit
+""")
+    ch = int(input("Enter choice: "))
+    if ch == 0:
+        print("Thank You!")
+        break
+    elif ch == 1:
+        addLead()
+    elif ch == 2:
+        viewLeads()
+    elif ch == 3:
+        updateLeadStatus()
+    elif ch == 4:
+        deleteLead()
+    else:
+        print("Invalid Choice!")
